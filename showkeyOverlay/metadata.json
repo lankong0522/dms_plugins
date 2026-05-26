@@ -1,0 +1,19 @@
+{
+  "id": "showkeyOverlay",
+  "name": "Keyboard Monitor",
+  "description": "Monitor keyboard input and show recent keystrokes as a desktop overlay.",
+  "version": "1.3.0",
+  "author": "local",
+  "type": "desktop",
+  "capabilities": [
+    "desktop-widget"
+  ],
+  "component": "./Widget.qml",
+  "icon": "keyboard",
+  "settings": "./Settings.qml",
+  "requires_dms": ">=1.2.0",
+  "permissions": [
+    "settings_read",
+    "settings_write"
+  ]
+}
