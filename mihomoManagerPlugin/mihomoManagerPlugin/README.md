@@ -141,3 +141,11 @@ Settings:
 - `External Traffic Refresh Ms`: default `3000`.
 
 This is runtime active-connection traffic, not subscription quota. Subscription quota still comes from `subscription-userinfo`.
+
+
+## v1.2.2
+
+- DankBar pill text now follows DMS bar sizing through `Theme.barTextSize(root.barThickness, root.barConfig?.fontScale)`.
+- DankBar icon size now follows DMS bar sizing through `Theme.barIconSize(root.barThickness, -4)`.
+- Horizontal and vertical bar pills are shrink-wrapped to avoid extra dead width or height.
+- Popout and settings page font sizes remain tied to normal DMS theme text sizes.

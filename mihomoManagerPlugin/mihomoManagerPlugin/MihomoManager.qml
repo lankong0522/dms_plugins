@@ -50,6 +50,30 @@ PluginComponent {
     property bool showDelayInBar: String(pluginData.showDelayInBar || "true") !== "false"
     property string lastResult: "Ready"
 
+    function resolvedBarTextSize() {
+        try {
+            return Theme.barTextSize(root.barThickness, root.barConfig?.fontScale)
+        } catch (e) {
+            return Theme.fontSizeSmall
+        }
+    }
+
+    function resolvedBarIconSize() {
+        try {
+            return Theme.barIconSize(root.barThickness, -4)
+        } catch (e) {
+            return Theme.iconSize
+        }
+    }
+
+    function resolvedBarTextColor() {
+        try {
+            return Theme.widgetTextColor || Theme.surfaceText
+        } catch (e) {
+            return Theme.surfaceText
+        }
+    }
+
     popoutWidth: 500
     popoutHeight: 820
 
@@ -83,41 +107,57 @@ PluginComponent {
     }
 
     horizontalBarPill: Component {
-        Row {
-            spacing: Theme.spacingS
+        Item {
+            implicitWidth: barRow.implicitWidth
+            implicitHeight: barRow.implicitHeight
+            width: implicitWidth
+            height: implicitHeight
 
-            DankIcon {
-                name: root.serviceActive ? "vpn_key" : "vpn_key_off"
-                size: Theme.iconSize
-                color: root.serviceActive ? Theme.primary : Theme.surfaceVariantText
-                anchors.verticalCenter: parent.verticalCenter
-            }
+            Row {
+                id: barRow
+                spacing: (root.barConfig?.noBackground ?? false) ? 2 : Theme.spacingXXS
 
-            StyledText {
-                text: root.barText()
-                font.pixelSize: Theme.fontSizeSmall
-                color: Theme.surfaceText
-                anchors.verticalCenter: parent.verticalCenter
+                DankIcon {
+                    name: root.serviceActive ? "vpn_key" : "vpn_key_off"
+                    size: root.resolvedBarIconSize()
+                    color: root.serviceActive ? Theme.primary : Theme.surfaceVariantText
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                StyledText {
+                    text: root.barText()
+                    font.pixelSize: root.resolvedBarTextSize()
+                    color: root.resolvedBarTextColor()
+                    anchors.verticalCenter: parent.verticalCenter
+                }
             }
         }
     }
 
     verticalBarPill: Component {
-        Column {
-            spacing: Theme.spacingXS
+        Item {
+            implicitWidth: barColumn.implicitWidth
+            implicitHeight: barColumn.implicitHeight
+            width: implicitWidth
+            height: implicitHeight
 
-            DankIcon {
-                name: root.serviceActive ? "vpn_key" : "vpn_key_off"
-                size: Theme.iconSize
-                color: root.serviceActive ? Theme.primary : Theme.surfaceVariantText
-                anchors.horizontalCenter: parent.horizontalCenter
-            }
+            Column {
+                id: barColumn
+                spacing: Theme.spacingXXS
 
-            StyledText {
-                text: root.currentDelayText !== "-- ms" ? root.currentDelayText.replace(" ms", "") : (root.tunActive ? "TUN" : "M")
-                font.pixelSize: Theme.fontSizeSmall
-                color: Theme.surfaceText
-                anchors.horizontalCenter: parent.horizontalCenter
+                DankIcon {
+                    name: root.serviceActive ? "vpn_key" : "vpn_key_off"
+                    size: root.resolvedBarIconSize()
+                    color: root.serviceActive ? Theme.primary : Theme.surfaceVariantText
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
+
+                StyledText {
+                    text: root.currentDelayText !== "-- ms" ? root.currentDelayText.replace(" ms", "") : (root.tunActive ? "TUN" : "M")
+                    font.pixelSize: root.resolvedBarTextSize()
+                    color: root.resolvedBarTextColor()
+                    anchors.horizontalCenter: parent.horizontalCenter
+                }
             }
         }
     }
