@@ -1,0 +1,20 @@
+{
+  "id": "mihomoManager",
+  "name": "Mihomo Manager",
+  "description": "Manage mihomo user service, TUN status, proxy tests, node paging/search, subscription traffic, node latency, and auto-hidden outbound traffic display from Dank Material Shell.",
+  "version": "1.2.1",
+  "author": "local",
+  "icon": "vpn_key",
+  "type": "widget",
+  "component": "./MihomoManager.qml",
+  "settings": "./MihomoManagerSettings.qml",
+  "capabilities": [
+    "dankbar-widget",
+    "control-center"
+  ],
+  "requires_dms": ">=1.4.0",
+  "permissions": [
+    "settings_read",
+    "settings_write"
+  ]
+}
