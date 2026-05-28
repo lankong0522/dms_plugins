@@ -165,7 +165,7 @@ PluginComponent {
     popoutContent: Component {
         PopoutComponent {
             id: popout
-            headerText: "Mihomo Manager"
+            headerText: "mihomoManager"
             detailsText: root.serviceActive ? "Service active. " + (root.tunActive ? "TUN is enabled." : "Proxy port only.") : "Service inactive."
             showCloseButton: true
 

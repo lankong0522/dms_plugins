@@ -7,7 +7,7 @@ import qs.Modules.Plugins
 
 PluginSettings {
     id: root
-    pluginId: "showkeyOverlay"
+    pluginId: "skeyboardMonitor"
 
     property int defaultFontSize: 34
     property string fontSize: String(root.loadValue("fontSize", defaultFontSize))
@@ -58,7 +58,7 @@ PluginSettings {
     }
 
     StyledText {
-        text: I18n.tr("Keyboard Monitor")
+        text: I18n.tr("skeyboardMonitor")
         font.pixelSize: Theme.fontSizeLarge
         font.weight: Font.Medium
         color: Theme.surfaceText
@@ -425,7 +425,7 @@ PluginSettings {
         }
 
         DankButton {
-            text: I18n.tr("Save Keyboard Monitor settings")
+            text: I18n.tr("Save skeyboardMonitor settings")
             width: parent.width
             onClicked: {
                 entryLifetime = sanitizeDecimalInput(entryLifetimeField.text, "1.8")

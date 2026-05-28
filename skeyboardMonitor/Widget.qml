@@ -164,7 +164,7 @@ DesktopPluginComponent {
                     root.output = payload.text ?? ""
                     root.errorText = payload.error ?? ""
                 } catch (error) {
-                    console.warn("[showkeyOverlay] invalid json:", trimmed)
+                    console.warn("[skeyboardMonitor] invalid json:", trimmed)
                 }
             }
         }
@@ -172,14 +172,14 @@ DesktopPluginComponent {
         stderr: SplitParser {
             onRead: line => {
                 if (line.trim().length > 0) {
-                    console.warn("[showkeyOverlay]", line)
+                    console.warn("[skeyboardMonitor]", line)
                 }
             }
         }
 
         onExited: exitCode => {
             root.output = ""
-            console.warn("[showkeyOverlay] streamer exited:", exitCode)
+            console.warn("[skeyboardMonitor] streamer exited:", exitCode)
         }
     }
 

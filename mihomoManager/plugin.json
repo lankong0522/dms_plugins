@@ -1,6 +1,6 @@
 {
   "id": "mihomoManager",
-  "name": "Mihomo Manager",
+  "name": "mihomoManager",
   "description": "Manage mihomo user service, TUN status, proxy tests, node paging/search, subscription traffic, node latency, auto-hidden outbound traffic display, and DMS bar font-size aware rendering.",
   "version": "1.2.2",
   "author": "local",

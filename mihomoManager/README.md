@@ -1,22 +1,38 @@
-# Mihomo Manager for Dank Material Shell
+# mihomoManager
 
-A local Dank Material Shell widget for managing a user-level `mihomo.service`.
+## 基础介绍
 
-## Features
+`mihomoManager` 是一个用于 Dank Material Shell（DMS）的 mihomo 管理插件。它可以在 DankBar 和 Control Center 中显示 mihomo 的运行状态，并提供服务控制、节点切换、延迟测试、订阅流量和外网连接流量查看等功能。
 
-- Show mihomo service state in DankBar.
-- Show TUN status by checking the `mihomo` network interface.
-- Start, stop, and restart `mihomo.service`.
-- Test mixed-port proxy connectivity and TUN direct connectivity.
-- Read mihomo REST API from `external-controller`.
-- Show current proxy group and current node.
-- Search and page through all nodes.
-- Switch node for a `select` proxy group.
-- Read subscription quota from `subscription-userinfo`.
-- Show current node latency in DankBar and popout.
-- Test latency for the current node or all nodes on the current page.
+插件面向本机用户级 `mihomo.service`，默认读取 `http://127.0.0.1:9090` 上的 mihomo REST API。插件不会修改 `~/.config/mihomo/config.yaml`。
 
-## Default Assumptions
+## 主要功能
+
+- 在 DankBar 中显示 `mihomo.service` 的运行状态。
+- 检查 `mihomo` TUN 网卡是否存在，并显示 TUN 状态。
+- 启动、停止、重启用户级 `mihomo.service`。
+- 测试 mixed-port 代理连通性和 TUN 直连连通性。
+- 读取 mihomo `external-controller` API。
+- 显示当前代理组、当前节点和节点列表。
+- 支持搜索节点、分页浏览节点。
+- 支持切换 `select` 类型代理组中的节点。
+- 支持读取 `subscription-userinfo` 订阅流量信息。
+- 支持显示当前节点延迟，并可对当前节点或当前页节点测速。
+- 支持在 DankBar 中显示外网活跃连接数量和上下行速率。
+
+## 依赖
+
+- DMS / DankMaterialShell
+- Quickshell
+- `mihomo`
+- `systemctl --user`
+- `curl`
+- `python3`
+- `ip`
+- 用户级服务名默认为 `mihomo.service`
+- mihomo 配置中需要启用 `external-controller`
+
+默认假设的 mihomo 配置：
 
 ```yaml
 mixed-port: 7890
@@ -25,127 +41,122 @@ tun:
   device: mihomo
 ```
 
-The plugin does not modify `~/.config/mihomo/config.yaml`.
+## 依赖安装说明
 
-## Installation
-
-```bash
-mkdir -p ~/.config/DankMaterialShell/plugins
-cp -r mihomoManagerPlugin ~/.config/DankMaterialShell/plugins/mihomoManager
-
-dms ipc call plugins reload mihomoManager
-```
-
-If runtime reload does not work, restart DMS:
+Arch Linux 参考：
 
 ```bash
-dms restart
+sudo pacman -S mihomo curl python iproute2
 ```
 
-Then open DMS Settings → Plugins, enable `Mihomo Manager`, and add it to DankBar or Control Center.
-
-## Requirements
-
-- `dms-shell`
-- `mihomo`
-- `curl`
-- `python3`
-- user service named `mihomo.service`
-- `external-controller: 127.0.0.1:9090` in mihomo config
-
-## Latency Display
-
-Version 1.1.2 adds latency display. The bar shows current-node latency after the first automatic delay test. The popout provides:
-
-- `当前延迟`: test the currently selected node.
-- `本页测速`: test all nodes currently visible after search/pagination.
-
-The default delay test URL is:
-
-```text
-https://www.gstatic.com/generate_204
-```
-
-You can change `Delay Test URL`, `Delay Timeout Ms`, `Auto Delay Test`, and `Show Delay In Bar` in plugin settings.
-
-## Node Switching Notes
-
-Only `select` proxy groups are suitable for manual switching. `url-test` and `fallback` groups are normally managed by mihomo automatically.
-
-If the plugin shows the wrong proxy group, open plugin settings and change `Proxy Group` to the actual group name in your mihomo config, for example:
-
-- `default`
-- `自动选择`
-- `故障转移`
-
-## Subscription Traffic Notes
-
-Remaining traffic is not mihomo's real-time traffic. The plugin reads quota from:
-
-```text
-subscription-userinfo: upload=1234; download=2234; total=1024000; expire=2218532293
-```
-
-`expire=` may be empty. In that case the plugin still shows used/remaining/total traffic and displays `无到期信息`.
-
-Manual check:
-
-```bash
-curl -fsSIL -A 'clash.meta' '你的订阅链接' | grep -i subscription-userinfo
-```
-
-## Troubleshooting
-
-Check mihomo API:
-
-```bash
-curl -s http://127.0.0.1:9090/proxies
-```
-
-Check delay endpoint manually:
-
-```bash
-NODE='你的节点名' python3 - <<'PY'
-import os, urllib.parse
-node = os.environ.get('NODE', '')
-print('http://127.0.0.1:9090/proxies/' + urllib.parse.quote(node, safe='') + '/delay?url=https%3A%2F%2Fwww.gstatic.com%2Fgenerate_204&timeout=5000')
-PY
-```
-
-Check user service:
+确认用户级服务存在：
 
 ```bash
 systemctl --user status mihomo.service
 ```
 
-Check TUN interface:
+确认 mihomo API 可访问：
+
+```bash
+curl -s http://127.0.0.1:9090/proxies
+```
+
+确认 TUN 网卡：
 
 ```bash
 ip link show mihomo
 ```
 
+安装插件：
 
-## Outbound Traffic Display
+```bash
+mkdir -p ~/.config/DankMaterialShell/plugins
+cp -r mihomoManager ~/.config/DankMaterialShell/plugins/
+dms ipc call plugins reload mihomoManager
+```
 
-Version 1.2.1 adds an optional external/proxy traffic display. It reads mihomo `/connections` and estimates active external traffic by excluding connections whose chain contains `DIRECT`, `REJECT`, `REJECT-DROP`, or `PASS`.
+如果热重载无效，重启 DMS：
 
-The display is tied to mihomo service state:
+```bash
+dms restart
+```
 
-- If `mihomo.service` is active and the option is enabled, DankBar may show `外网 N条 ↑... ↓...`.
-- If you stop mihomo from the plugin or from systemd, the plugin clears that text and stops refreshing external traffic.
-- If the option is set to `false`, no external traffic text is shown in DankBar.
+然后在 DMS Settings -> Plugins 中启用 `mihomoManager`，并把它添加到 DankBar 或 Control Center。
 
-Settings:
+## 其他特殊说明
 
-- `Show External Traffic In Bar`: `true` / `false`.
-- `External Traffic Refresh Ms`: default `3000`.
+- 插件只读取和控制 mihomo，不会主动改写 `~/.config/mihomo/config.yaml`。
+- `Proxy Group` 应填写实际用于手动切换的 `select` 类型代理组名称，例如 `default`、`自动选择` 或你的自定义代理组。
+- `url-test`、`fallback` 等代理组通常由 mihomo 自动管理，不适合手动切换。
+- 当前节点延迟默认使用 `https://www.gstatic.com/generate_204` 测试，可在插件设置中修改。
+- 订阅剩余流量来自 `subscription-userinfo` 响应头或配置文件开头注释，不是 mihomo 实时流量。
+- 外网流量显示来自 mihomo `/connections`，会排除链路中包含 `DIRECT`、`REJECT`、`REJECT-DROP`、`PASS` 的连接。
+- 外网流量是当前活跃连接的估算值，不等同于订阅用量。
+- 如果订阅服务商没有返回 `subscription-userinfo`，插件会显示未读取到流量信息。
 
-This is runtime active-connection traffic, not subscription quota. Subscription quota still comes from `subscription-userinfo`.
+手动检查订阅流量响应头：
 
+```bash
+curl -fsSIL -A 'clash.meta' '你的订阅链接'
+```
 
-## v1.2.2
+## 文件结构及作用
 
-- DankBar pill text now follows DMS bar sizing through `Theme.barTextSize(root.barThickness, root.barConfig?.fontScale)`.
-- DankBar icon size now follows DMS bar sizing through `Theme.barIconSize(root.barThickness, -4)`.
-- Horizontal and vertical bar pills are shrink-wrapped to avoid extra dead width or height.
-- Popout and settings page font sizes remain tied to normal DMS theme text sizes.
+插件目录建议放在：
+
+```text
+~/.config/DankMaterialShell/plugins/mihomoManager/
+```
+
+目录结构：
+
+```text
+mihomoManager/
+├── plugin.json
+├── MihomoManager.qml
+├── MihomoManagerSettings.qml
+└── README.md
+```
+
+各文件作用：
+
+| 文件 | 作用 |
+|---|---|
+| `plugin.json` | DMS 插件清单，定义插件 ID、名称、类型、入口组件、设置页、权限和兼容版本等信息。 |
+| `MihomoManager.qml` | 插件主组件，负责 DankBar / Control Center 显示、服务控制、API 读取、节点切换、测速和流量展示。 |
+| `MihomoManagerSettings.qml` | 插件设置页，提供服务名、API 地址、代理组、订阅链接、测速地址和显示选项等设置。 |
+| `README.md` | 插件说明文档。 |
+
+## 运行时中间文件
+
+`mihomoManager` 不创建独立的运行时临时文件。
+
+插件运行时会通过 DMS / Quickshell 启动以下外部命令读取状态或执行操作：
+
+| 命令 | 用途 |
+|---|---|
+| `systemctl --user` | 查询、启动、停止、重启 `mihomo.service`。 |
+| `curl` | 请求 mihomo REST API、测速接口和订阅链接。 |
+| `python3` | 处理批量测速、外网连接统计和订阅流量解析。 |
+| `ip link show mihomo` | 检查 TUN 网卡状态。 |
+
+插件设置由 DMS 插件系统保存，不在插件目录中生成额外配置文件。
+
+## 插件删除（包括临时文件）
+
+删除前建议先在 DMS Settings -> Plugins 中禁用 `mihomoManager`，或从 DankBar / Control Center 中移除该插件。
+
+删除插件目录：
+
+```bash
+rm -rf ~/.config/DankMaterialShell/plugins/mihomoManager
+dms ipc call plugins reload mihomoManager
+```
+
+如果热重载无效，重启 DMS：
+
+```bash
+dms restart
+```
+
+该插件没有需要额外清理的独立临时文件。删除插件不会删除 mihomo 本身、`mihomo.service`、订阅配置或 `~/.config/mihomo/config.yaml`。
